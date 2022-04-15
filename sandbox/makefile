@@ -1,9 +1,9 @@
-SRC = $(wildcard src/*.cpp)
-DST = $(patsubst src/%.cpp, obj/%.o, $(SRC))
+INCLUDE := -I ../hazel/include -I ../hazel/vendor/spdlog/include
 
-all: $(DST)
-	g++ $^ -o sandbox -L ../hazel/lib -lhazel
-obj/%.o: src/%.cpp
-	g++ -c $^ -o $@ -I ../hazel/include
-clean:
-	rm -f sandbox obj/*.o obj/*.i lib/*.a lib/*.so
+include ../commakefile
+
+all: $(DIR_OBJ) $(OBJ) $(DIR_BIN)
+	g++ $(filter %.o, $^) -o $(DIR_BIN)/sandbox -L ../hazel/lib -lhazel
+obj/%.o:
+	g++ -E $< -o $(@:.o=.i) $(INCLUDE)
+	g++ -c $< -o $@ $(INCLUDE)

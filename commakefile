@@ -1,0 +1,33 @@
+.PHONY = all clean
+
+DIR_SRC := src
+DIR_DEP := dep
+DIR_OBJ := obj
+DIR_LIB := lib
+DIR_BIN := bin
+DIRS := $(DIR_DEP) $(DIR_OBJ) $(DIR_LIB) $(DIR_BIN)
+
+SRC := $(wildcard $(DIR_SRC)/*.cpp)
+DEP := $(patsubst $(DIR_SRC)/%.cpp, $(DIR_DEP)/%.dep, $(SRC))
+OBJ := $(patsubst $(DIR_SRC)/%.cpp, $(DIR_OBJ)/%.o, $(SRC))
+
+ifeq ("$(MAKECMDGOALS)", "")
+_:
+	make all
+endif
+
+ifeq ("$(MAKECMDGOALS)", "all")
+include $(DEP)
+endif
+
+ifeq ("$(wildcard, $(DIR_DEP))", "")
+$(DIR_DEP)/%.dep: $(DIR_DEP) $(DIR_SRC)/%.cpp
+else
+$(DIR_DEP)/%.dep: $(DIR_SRC)/%.cpp
+endif
+	g++ -MM -E $(filter %.cpp, $^) $(INCLUDE) | sed 's,\(.*\)\.o[ :]*,$(DIR_OBJ)/\1.o: ,' > $@
+
+$(DIRS):
+	mkdir $@
+clean:
+	rm -rf $(DIRS)

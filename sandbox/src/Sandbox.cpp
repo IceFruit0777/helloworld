@@ -4,8 +4,6 @@ class Sandbox : public Hazel::Application {
 
 };
 
-int main() {
-    Sandbox* sandbox = new Sandbox();
-    sandbox->run();
-    delete sandbox;
+Hazel::Application* Hazel::createApplication() {
+    return new Sandbox();
 }

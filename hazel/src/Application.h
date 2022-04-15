@@ -8,4 +8,6 @@ namespace Hazel {
 
         void run();
     };
+
+    Application* createApplication();
 }

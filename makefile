@@ -1,7 +1,9 @@
-MAKE = make -C hazel && make -C sandbox
-CLEAN = $(subst make, make clean, $(MAKE))
+ifeq ("$(MAKECMDGOALS)", "")
+TARGET := _
+else
+TARGET := $(MAKECMDGOALS)
+endif
 
-all:
-	$(MAKE)
-clean:
-	$(CLEAN)
+$(TARGET):
+	$(MAKE) $(MAKECMDGOALS) -C hazel
+	$(MAKE) $(MAKECMDGOALS) -C sandbox
