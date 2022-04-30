@@ -5,11 +5,17 @@ DIR_DEP := dep
 DIR_OBJ := obj
 DIR_LIB := lib
 DIR_BIN := bin
-DIRS := $(DIR_DEP) $(DIR_OBJ) $(DIR_LIB) $(DIR_BIN)
+DIR_PCH := ../hazel/pch
+DIR_GCH := ../hazel/gch
+DIRS_RUNTIME := $(DIR_DEP) $(DIR_OBJ) $(DIR_LIB) $(DIR_BIN) $(DIR_GCH) # 运行时创建的目录，clean时删除
 
 SRC := $(wildcard $(DIR_SRC)/*.cpp)
 DEP := $(patsubst $(DIR_SRC)/%.cpp, $(DIR_DEP)/%.dep, $(SRC))
 OBJ := $(patsubst $(DIR_SRC)/%.cpp, $(DIR_OBJ)/%.o, $(SRC))
+PCH := $(wildcard $(DIR_PCH)/*.h)
+GCH := $(patsubst $(DIR_PCH)/%.h, $(DIR_GCH)/%.h.gch, $(PCH))
+
+INCLUDE := -I ../hazel/include -I ../hazel/vendor/spdlog/include
 
 ifeq ("$(MAKECMDGOALS)", "")
 _:
@@ -25,9 +31,16 @@ $(DIR_DEP)/%.dep: $(DIR_DEP) $(DIR_SRC)/%.cpp
 else
 $(DIR_DEP)/%.dep: $(DIR_SRC)/%.cpp
 endif
-	g++ -MM -E $(filter %.cpp, $^) $(INCLUDE) | sed 's,\(.*\)\.o[ :]*,$(DIR_OBJ)/\1.o: ,' > $@
+	g++ -MM -E $(filter %.cpp, $^) $(INCLUDE) | sed 's,\(.*\)\.o[ :]*,$(DIR_OBJ)/\1.o: $(GCH) ,' > $@
 
-$(DIRS):
+ifeq ("$(wildcard, $(DIR_GCH))", "")
+$(DIR_GCH)/%.h.gch: $(DIR_GCH) $(DIR_PCH)/%.h
+else
+$(DIR_GCH)/%.h.gch: $(DIR_PCH)/%.h
+endif
+	g++ -c $(filter %.h, $^) -o $@
+
+$(DIRS_RUNTIME):
 	mkdir $@
 clean:
-	rm -rf $(DIRS)
+	rm -rf $(DIRS_RUNTIME)
